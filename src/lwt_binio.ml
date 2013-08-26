@@ -17,7 +17,41 @@ module type Conv_sig = sig
   val set_int64 : string -> int -> int64 -> unit
 end
 
+module type S = sig
+  type src_t
+
+  val read :
+    src_t ->
+    size:int ->
+    offset:int ->
+    get:(string -> int -> 'a) -> conv:('a -> 'b) -> 'b option Lwt.t
+  val write :
+    src_t ->
+    'a ->
+    size:int ->
+    offset:int ->
+    set:(string -> int -> 'b -> 'c) -> conv:('a -> 'b) -> unit Lwt.t
+  val four_byte :
+    (int32 -> 'a) ->
+    ('b -> int32) ->
+    (src_t -> int -> 'a option Lwt.t) * (src_t -> int -> 'b -> unit Lwt.t)
+  val eight_byte :
+    (int64 -> 'a) ->
+    ('b -> int64) ->
+    (src_t -> int -> 'a option Lwt.t) * (src_t -> int -> 'b -> unit Lwt.t)
+  val read_float32 : src_t -> int -> float option Lwt.t
+  val write_float32 : src_t -> int -> float -> unit Lwt.t
+  val read_int32 : src_t -> int -> int32 option Lwt.t
+  val write_int32 : src_t -> int -> int32 -> unit Lwt.t
+  val read_float64 : src_t -> int -> float option Lwt.t
+  val write_float64 : src_t -> int -> float -> unit Lwt.t
+  val read_int64 : src_t -> int -> int64 option Lwt.t
+  val write_int64 : src_t -> int -> int64 -> unit Lwt.t
+end
+
 module Make(Src : Src_sig)(Conv : Conv_sig) = struct
+  type src_t = Src.t
+
   let read fd ~size ~offset ~get ~conv =
     Src.read_bytes fd ~size ~offset >|= fun maybe_bytes ->
     match maybe_bytes with
@@ -32,12 +66,6 @@ module Make(Src : Src_sig)(Conv : Conv_sig) = struct
     let bytes = String.make size ' ' in
     set bytes size (conv x);
     Src.write_bytes fd bytes ~offset
-
-  let read_four_byte fd offset conv =
-    read fd ~size:4 ~offset ~get:Conv.get_int32 ~conv
-
-  let write_four_byte fd offset conv =
-    write fd ~size:4 ~offset ~set:Conv.set_int32 ~conv
 
   let four_byte r w =
     (fun fd offset -> read fd ~size:4 ~offset ~get:Conv.get_int32 ~conv:r),
