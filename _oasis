@@ -1,0 +1,22 @@
+OASISFormat: 0.3
+Name:        lwt-binio
+Version:     0.1.0
+Synopsis:    Asynchronous random access IO for numbers
+Authors:     Hezekiah M. Carty
+License:     MIT
+Plugins:     DevFiles (0.3), META (0.3)
+BuildTools:  ocamlbuild
+
+Library "lwt-binio"
+  Path:           src
+  FindlibName:    lwt-binio
+  Modules:        Lwt_binio
+  BuildDepends:   lwt.unix, ocplib-endian
+  CompiledObject: best
+
+Executable test
+  Path: test
+  MainIs: test.ml
+  Install: false
+  BuildDepends: lwt-binio
+
