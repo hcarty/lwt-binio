@@ -2,17 +2,17 @@ module type Src_sig = sig
   (** Data source *)
 
   type t
-  val read_bytes : t -> size:int -> offset:int -> string option Lwt.t
-  val write_bytes : t -> string -> offset:int -> unit Lwt.t
+  val read_bytes : t -> size:int -> offset:int -> Bytes.t option Lwt.t
+  val write_bytes : t -> Bytes.t -> offset:int -> unit Lwt.t
 end
 
 module type Conv_sig = sig
   (** Data conversion *)
 
-  val get_int32 : string -> int -> int32
-  val set_int32 : string -> int -> int32 -> unit
-  val get_int64 : string -> int -> int64
-  val set_int64 : string -> int -> int64 -> unit
+  val get_int32 : Bytes.t -> int -> int32
+  val set_int32 : Bytes.t -> int -> int32 -> unit
+  val get_int64 : Bytes.t -> int -> int64
+  val set_int64 : Bytes.t -> int -> int64 -> unit
 end
 
 module type S = sig
@@ -22,13 +22,13 @@ module type S = sig
     src_t ->
     size:int ->
     offset:int ->
-    get:(string -> int -> 'a) -> conv:('a -> 'b) -> 'b option Lwt.t
+    get:(Bytes.t -> int -> 'a) -> conv:('a -> 'b) -> 'b option Lwt.t
   val write :
     src_t ->
     'a ->
     size:int ->
     offset:int ->
-    set:(string -> int -> 'b -> 'c) -> conv:('a -> 'b) -> unit Lwt.t
+    set:(Bytes.t -> int -> 'b -> 'c) -> conv:('a -> 'b) -> unit Lwt.t
   (** Arbitrary value IO *)
 
   val four_byte :
@@ -61,9 +61,9 @@ module Fd : sig
     type t = Lwt_unix.file_descr
     val read_bytes :
       Lwt_unix.file_descr ->
-      size:int -> offset:int -> string option Lwt.t
+      size:int -> offset:int -> Bytes.t option Lwt.t
     val write_bytes :
-      Lwt_unix.file_descr -> string -> offset:int -> unit Lwt.t
+      Lwt_unix.file_descr -> Bytes.t -> offset:int -> unit Lwt.t
   end
 
   module LittleEndian : S with type src_t = Lwt_unix.file_descr
@@ -77,9 +77,9 @@ module Io : sig
     type t = Lwt_io.input_channel * Lwt_io.output_channel
     val read_bytes :
       Lwt_io.input_channel * 'a ->
-      size:int -> offset:int -> string option Lwt.t
+      size:int -> offset:int -> Bytes.t option Lwt.t
     val write_bytes :
-      'a * Lwt_io.output_channel -> string -> offset:int -> unit Lwt.t
+      'a * Lwt_io.output_channel -> Bytes.t -> offset:int -> unit Lwt.t
   end
 
   module LittleEndian :

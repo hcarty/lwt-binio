@@ -6,15 +6,15 @@ external identity : 'a -> 'a = "%identity"
 module type Src_sig = sig
   type t
 
-  val read_bytes : t -> size:int -> offset:int -> string option Lwt.t
-  val write_bytes : t -> string -> offset:int -> unit Lwt.t
+  val read_bytes : t -> size:int -> offset:int -> Bytes.t option Lwt.t
+  val write_bytes : t -> Bytes.t -> offset:int -> unit Lwt.t
 end
 
 module type Conv_sig = sig
-  val get_int32 : string -> int -> int32
-  val set_int32 : string -> int -> int32 -> unit
-  val get_int64 : string -> int -> int64
-  val set_int64 : string -> int -> int64 -> unit
+  val get_int32 : Bytes.t -> int -> int32
+  val set_int32 : Bytes.t -> int -> int32 -> unit
+  val get_int64 : Bytes.t -> int -> int64
+  val set_int64 : Bytes.t -> int -> int64 -> unit
 end
 
 module type S = sig
@@ -24,13 +24,13 @@ module type S = sig
     src_t ->
     size:int ->
     offset:int ->
-    get:(string -> int -> 'a) -> conv:('a -> 'b) -> 'b option Lwt.t
+    get:(Bytes.t -> int -> 'a) -> conv:('a -> 'b) -> 'b option Lwt.t
   val write :
     src_t ->
     'a ->
     size:int ->
     offset:int ->
-    set:(string -> int -> 'b -> 'c) -> conv:('a -> 'b) -> unit Lwt.t
+    set:(Bytes.t -> int -> 'b -> 'c) -> conv:('a -> 'b) -> unit Lwt.t
   val four_byte :
     (int32 -> 'a) ->
     ('b -> int32) ->
@@ -63,7 +63,7 @@ module Make(Src : Src_sig)(Conv : Conv_sig) = struct
       )
 
   let write fd x ~size ~offset ~set ~conv =
-    let bytes = String.make size ' ' in
+    let bytes = Bytes.make size ' ' in
     set bytes size (conv x);
     Src.write_bytes fd bytes ~offset
 
@@ -91,7 +91,7 @@ module Fd = struct
     type t = Lwt_unix.file_descr
 
     let read_bytes fd ~size ~offset =
-      let buffer = String.make size ' ' in
+      let buffer = Bytes.make size ' ' in
       let byte_offset = offset * size in
       Lwt_unix.lseek fd byte_offset Unix.SEEK_SET >>= fun _ ->
       Lwt_unix.read fd buffer 0 size >>= fun bytes_read ->
@@ -99,7 +99,7 @@ module Fd = struct
       Lwt.return result
 
     let write_bytes fd buffer ~offset =
-      let size = String.length buffer in
+      let size = Bytes.length buffer in
       let byte_offset = offset * size in
       Lwt_unix.lseek fd byte_offset Unix.SEEK_SET >>= fun _ ->
       let rec write_loop offset remaining_bytes =
@@ -114,8 +114,8 @@ module Fd = struct
       write_loop 0 size
   end
 
-  module LittleEndian = Make(Src)(EndianString.LittleEndian)
-  module BigEndian = Make(Src)(EndianString.BigEndian)
+  module LittleEndian = Make(Src)(EndianBytes.LittleEndian)
+  module BigEndian = Make(Src)(EndianBytes.BigEndian)
 end
 
 module Io = struct
@@ -123,7 +123,7 @@ module Io = struct
     type t = Lwt_io.input_channel * Lwt_io.output_channel
 
     let read_bytes (input, _) ~size ~offset =
-      let buffer = String.make size '.' in
+      let buffer = Bytes.make size '.' in
       let byte_offset = offset * size in
       Lwt_io.set_position input (Int64.of_int byte_offset) >>= fun () ->
       Lwt_io.read_into input buffer 0 size >>= fun bytes_read ->
@@ -131,12 +131,12 @@ module Io = struct
       Lwt.return result
 
     let write_bytes (_, output) buffer ~offset =
-      let size = String.length buffer in
+      let size = Bytes.length buffer in
       let byte_offset = offset * size in
       Lwt_io.set_position output (Int64.of_int byte_offset) >>= fun () ->
       Lwt_io.write_from_exactly output buffer 0 size
   end
 
-  module LittleEndian = Make(Src)(EndianString.LittleEndian)
-  module BigEndian = Make(Src)(EndianString.BigEndian)
+  module LittleEndian = Make(Src)(EndianBytes.LittleEndian)
+  module BigEndian = Make(Src)(EndianBytes.BigEndian)
 end

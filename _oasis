@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        lwt-binio
-Version:     0.1.0
+Version:     0.2.0
 Synopsis:    Asynchronous random access IO for numbers
 Authors:     Hezekiah M. Carty
 License:     MIT
@@ -11,7 +11,7 @@ Library "lwt-binio"
   Path:           src
   FindlibName:    lwt-binio
   Modules:        Lwt_binio
-  BuildDepends:   lwt.unix, ocplib-endian
+  BuildDepends:   lwt.unix, bytes, ocplib-endian
   CompiledObject: best
 
 Executable test
