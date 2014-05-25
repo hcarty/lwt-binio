@@ -1,10 +1,10 @@
-OASISFormat: 0.3
+OASISFormat: 0.4
 Name:        lwt-binio
-Version:     0.2.0
+Version:     0.2.1
 Synopsis:    Asynchronous random access IO for numbers
 Authors:     Hezekiah M. Carty
 License:     MIT
-Plugins:     DevFiles (0.3), META (0.3)
+Plugins:     DevFiles (0.4), META (0.4)
 BuildTools:  ocamlbuild
 
 Library "lwt-binio"

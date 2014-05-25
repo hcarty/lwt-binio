@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: 22d6a6c233a1ae74bbd7c4f28080afac)
+version = "0.2.1"
+description = "Asynchronous random access IO for numbers"
+requires = "lwt.unix bytes ocplib-endian"
+archive(byte) = "lwt-binio.cma"
+archive(byte, plugin) = "lwt-binio.cma"
+archive(native) = "lwt-binio.cmxa"
+archive(native, plugin) = "lwt-binio.cmxs"
+exists_if = "lwt-binio.cma"
+# OASIS_STOP
+
