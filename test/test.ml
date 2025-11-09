@@ -1,4 +1,3 @@
-open Bigarray
 let ( >>= ) = Lwt.( >>= )
 
 let () =

@@ -1,5 +1,3 @@
 _build/
-*.byte
-*.native
-*.data
-setup.log
+*.install
+*.merlin

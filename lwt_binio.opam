@@ -1,0 +1,22 @@
+opam-version: "2.0"
+maintainer: "hez@0ok.org"
+authors: ["Hezekiah M. Carty <hez@0ok.org>"]
+homepage: "http://github.com/hcarty/lwt-binio"
+bug-reports: "https://github.com/hcarty/lwt-binio/issues"
+license: "MIT"
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs
+    "@install"
+    "@runtest" {with-test}
+    "@doc" {with-doc}]
+]
+depends: [
+  "ocaml" {>= "4.01.0"}
+  "base-bytes"
+  "lwt"
+  "ocplib-endian" {>= "0.6"}
+  "dune"
+]
+dev-repo: "git://github.com/hcarty/lwt-binio"
+synopsis: "Asynchronous random access IO for numbers"

@@ -1,3 +1,0 @@
-PKG lwt.unix bytes ocplib-endian
-S src/
-B _build/src/

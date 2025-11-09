@@ -1,0 +1,4 @@
+(library
+  (public_name lwt_binio)
+  (wrapped false)
+  (libraries lwt.unix bytes ocplib-endian))

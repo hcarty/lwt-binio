@@ -30,7 +30,7 @@ module type S = sig
     'a ->
     size:int ->
     offset:int ->
-    set:(Bytes.t -> int -> 'b -> 'c) -> conv:('a -> 'b) -> unit Lwt.t
+    set:(Bytes.t -> int -> 'b -> unit) -> conv:('a -> 'b) -> unit Lwt.t
   val four_byte :
     (int32 -> 'a) ->
     ('b -> int32) ->
